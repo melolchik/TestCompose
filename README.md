@@ -238,3 +238,80 @@ fun TimesTable(){
         }
     }
 }
+
+#2.4 Instagram Profile Card. Создание шаблона
+
+@Preview
+@Composable
+fun InstagramProfileCard(){
+
+    Row(modifier = Modifier.fillMaxWidth()
+        .height(500.dp)
+        .padding(all = 8.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly, <---- распределение равномерное по горизонали
+		verticalAlignment = Alignment.CenterVertically ) <---- выравнивание элементов по вертикали			
+		{ 
+      Box(modifier = Modifier
+          .size(50.dp)
+          .background(color = Color.Yellow)
+      ){}
+        Column(modifier = Modifier
+            .height(80.dp)
+            .background(color = Color.Green),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceEvenly <---- распределение равномерное по вертикали
+        ){
+            Box(modifier = Modifier
+                .size(25.dp)
+                .background(color = Color.Blue)
+            ){}
+            Box(modifier = Modifier
+                .size(25.dp)
+                .background(color = Color.Red)
+            ){}
+        }
+
+    }
+}
+
+Но колонок Column должно быть 3 - вынесем её в отдельную функцию TwoBoxes()
+
+
+@Preview
+@Composable
+fun InstagramProfileCard(){
+
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .padding(all = 8.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically ){
+      Box(modifier = Modifier
+          .size(50.dp)
+          .background(color = Color.Yellow)
+      ){}
+        TwoBoxes()
+        TwoBoxes()
+        TwoBoxes()
+
+    }
+}
+
+@Composable
+private  fun TwoBoxes(){
+    Column(modifier = Modifier
+        .height(80.dp)
+        .background(color = Color.Green),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceEvenly
+    ){
+        Box(modifier = Modifier
+            .size(25.dp)
+            .background(color = Color.Blue)
+        ){}
+        Box(modifier = Modifier
+            .size(25.dp)
+            .background(color = Color.Red)
+        ){}
+    }
+}

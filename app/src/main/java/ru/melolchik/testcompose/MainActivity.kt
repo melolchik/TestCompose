@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import ru.melolchik.testcompose.ui.theme.InstagramProfileCard
 import ru.melolchik.testcompose.ui.theme.TestComposeTheme
 
 class MainActivity : ComponentActivity() {
@@ -30,17 +31,18 @@ class MainActivity : ComponentActivity() {
 
         //enableEdgeToEdge()
         setContent {
-            TimesTable()
-        }
+            InstagramProfileCard()
+       }
     }
 }
 
 @Preview
 @Composable
 fun TimesTable(){
-    Column (modifier = Modifier.background(color = Color.Yellow)
-                                //.padding(all = 16.dp)
-                                .fillMaxSize())
+    Column (modifier = Modifier
+        .background(color = Color.Yellow)
+        //.padding(all = 16.dp)
+        .fillMaxSize())
         {
         for(i in 1 ..9){
             Row(modifier = Modifier
