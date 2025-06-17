@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -36,33 +42,15 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
 @Preview
 @Composable
-fun TimesTable(){
-    Column (modifier = Modifier
-        .background(color = Color.Yellow)
-        //.padding(all = 16.dp)
-        .fillMaxSize())
-        {
-        for(i in 1 ..9){
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-
-            ){
-                for(j in 1 ..9){
-
-                    val color = if( (i + j).mod(2) == 1) Color.White else Color.Yellow
-                    Box(modifier = Modifier.fillMaxHeight()
-                        .weight(1f)
-                        .border(width = 1.dp, color = Color.Gray)
-                        .background(color = color),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "${i * j}")
-                    }
-                }
-            }
-        }
+fun CardTest(){
+    Card(modifier = Modifier.padding(16.dp),
+        shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Green, contentColor = Color.Red),
+        border = BorderStroke(width = 1.dp,color = Color.Black)
+    ){
+        Text("Hello World" , modifier = Modifier.padding(16.dp))
     }
 }

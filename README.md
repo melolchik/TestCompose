@@ -315,3 +315,73 @@ private  fun TwoBoxes(){
         ){}
     }
 }
+
+#2.5 Card
+
+Сделаем аналог CardView
+
+Потестируем Card
+
+@Preview
+@Composable
+fun CardTest(){
+    Card(modifier = Modifier.padding(16.dp),
+        shape = RoundedCornerShape(4.dp).copy(
+            bottomStart = CornerSize(0.dp), <-- скруугление только в верхних углах
+            bottomEnd = CornerSize(0.dp))
+    ){
+        Text("Hello World" , modifier = Modifier.padding(16.dp))
+    }
+}
+
+Либо так задать углы
+
+@Preview
+@Composable
+fun CardTest(){
+    Card(modifier = Modifier.padding(16.dp),
+        shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+    ){
+        Text("Hello World" , modifier = Modifier.padding(16.dp))
+    }
+}
+
+@Preview
+@Composable
+fun CardTest(){
+    Card(modifier = Modifier.padding(16.dp),
+        shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Green, contentColor = Color.Red) <--- цвет фона и цвет контента
+    ){
+        Text("Hello World" , modifier = Modifier.padding(16.dp))
+    }
+}
+
+Добавляем Card в InstagramProfileCard
+
+@Preview
+@Composable
+fun InstagramProfileCard(){
+
+    Card (shape = RoundedCornerShape(topStart =8.dp, topEnd = 8.dp),
+        border = BorderStroke(width = 1.dp, color = Color.Black),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    )
+    {
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(all = 8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically ){
+            Box(modifier = Modifier
+                .size(50.dp)
+                .background(color = Color.Yellow)
+            ){}
+            TwoBoxes()
+            TwoBoxes()
+            TwoBoxes()
+
+        }
+    }
+
+}
