@@ -486,3 +486,105 @@ class MainActivity : ComponentActivity() {
     }
 }
 Но в таких случаях использование Column излишне, лучше использовать Box
+
+
+#2.7 Text
+
+@Composable
+fun Text(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    fontSize: TextUnit = TextUnit.Unspecified, <---- Наследуется от родительской функции
+    fontStyle: FontStyle? = null,
+    fontWeight: FontWeight? = null,
+    fontFamily: FontFamily? = null,
+    letterSpacing: TextUnit = TextUnit.Unspecified, <---- Наследуется от родительской функции
+    textDecoration: TextDecoration? = null,
+    textAlign: TextAlign? = null,
+    lineHeight: TextUnit = TextUnit.Unspecified, <---- Наследуется от родительской функции
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    maxLines: Int = Int.MAX_VALUE,
+    minLines: Int = 1,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+    style: TextStyle = LocalTextStyle.current
+) {
+
+Поработаем с параметрами
+
+Text(text ="Hello world",
+        fontSize = 24.sp,
+        fontWeight = FontWeight.Bold,
+        fontStyle = FontStyle.Italic,
+        fontFamily = FontFamily.Serif,
+        textDecoration = TextDecoration.Underline + TextDecoration.LineThrough
+    )
+	
+Если в строке нужно разные части декорировать по разному используем
+
+@Preview
+@Composable
+fun TestText(){
+
+    Text(
+        buildAnnotatedString {
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold)){ <--- стиль для отдельной части строки
+                append("Hello")
+            }
+            withStyle(SpanStyle(textDecoration = TextDecoration.Underline)){
+                append(" ")
+            }
+            withStyle(SpanStyle(fontSize = 30.sp, textDecoration = TextDecoration.LineThrough)){
+                append("World")
+                append("!")
+            }
+
+        }
+    )
+}
+
+Вернёмся к InstagramProfileCard
+
+fun InstagramProfileCard(){
+
+    Card (modifier = Modifier.padding(8.dp),
+        shape = RoundedCornerShape(topStart =8.dp, topEnd = 8.dp),
+        border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.onBackground),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)
+    )
+    {
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(all = 8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically ){
+            Box(modifier = Modifier
+                .size(50.dp)
+                .background(color = Color.Yellow)
+            ){}
+            UserStatistic(title = "Posts", value = "9849") <--- передаём параметры пока так
+            UserStatistic(title = "Followers", value = "576")
+            UserStatistic(title = "Following", value = "900")
+
+        }
+    }
+
+}
+ //Переименовали TwoBoxes 
+@Composable
+private  fun UserStatistic(title : String, value : String){ <--- добавили параметры
+    Column(modifier = Modifier
+        .height(80.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceEvenly
+    ){
+        Text(text = value, <----  Box заменили на Text
+            fontSize = 30.sp,
+            fontFamily = FontFamily.Cursive
+            )
+        Text( text = title,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold)
+    }
+}
