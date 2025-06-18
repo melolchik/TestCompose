@@ -46,8 +46,10 @@ fun InstagramProfileCard(){
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically ){
             Image(modifier = Modifier
+                .clip(shape = CircleShape)
+                .background(color = Color.White)
+                .padding(8.dp)
                 .size(50.dp),
-                //.clip(shape = CircleShape),
                 painter = painterResource(id = R.drawable.ic_instagram),
                 contentDescription = "",
 

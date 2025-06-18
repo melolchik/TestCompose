@@ -631,3 +631,95 @@ fun InstagramProfileCard(){
     }
 
 }
+
+#2.9 Порядок modifier-ов
+
+Сделаем следующее
+
+@Preview
+@Composable
+fun TestImage(){
+
+    Box(modifier = Modifier.size(200.dp)
+        .background(Color.Cyan)){
+        Image(modifier = Modifier.size(100.dp),
+            painter = ColorPainter(Color.Yellow),
+            contentDescription = "",
+            contentScale = ContentScale.FillBounds)
+    }
+
+}
+
+
+@Preview
+@Composable
+fun TestImage(){
+
+    Box(modifier = Modifier.size(200.dp)
+        .background(Color.Cyan)){
+        Image(modifier = Modifier.size(100.dp)
+            .background(Color.Red)
+            .padding(25.dp),
+            painter = ColorPainter(Color.Yellow),
+            contentDescription = "",
+            contentScale = ContentScale.FillBounds)
+    }
+
+}
+<--- видим голубой фон. Box красный и внутри жёлтый квадрат
+
+Теперь поменяем padding и size
+
+@Preview
+@Composable
+fun TestImage(){
+
+    Box(modifier = Modifier.size(200.dp)
+        .background(Color.Cyan)){
+
+        Image(modifier = Modifier
+            .background(Color.Green)
+            .padding(25.dp)
+            .size(100.dp)
+            .background(Color.Red).padding(25.dp),
+            painter = ColorPainter(Color.Yellow),
+            contentDescription = "",
+            contentScale = ContentScale.FillBounds)
+    }
+
+}
+
+Порядок модификаторов имеет значение и прменяется по порядку. + модифайеры можно повторять
+
+Сделаем иконку Instagram в белом круге для любой темы
+@Composable
+fun InstagramProfileCard(){
+
+    Card (modifier = Modifier.padding(8.dp),
+        shape = RoundedCornerShape(topStart =8.dp, topEnd = 8.dp),
+        border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.onBackground),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)
+    )
+    {
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(all = 8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically ){
+            Image(modifier = Modifier
+                .clip(shape = CircleShape)
+                .background(color = Color.White)
+                .padding(8.dp)
+                .size(50.dp),
+                painter = painterResource(id = R.drawable.ic_instagram),
+                contentDescription = "",
+
+            )
+            UserStatistic(title = "Posts", value = "9849")
+            UserStatistic(title = "Followers", value = "576")
+            UserStatistic(title = "Following", value = "900")
+
+        }
+    }
+
+}
