@@ -7,12 +7,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,25 +43,44 @@ fun InstagramProfileCard(){
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)
     )
     {
-        Row(modifier = Modifier
+        Column (modifier = Modifier
             .fillMaxWidth()
-            .padding(all = 8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically ){
-            Image(modifier = Modifier
-                .clip(shape = CircleShape)
-                .background(color = Color.White)
-                .padding(8.dp)
-                .size(50.dp),
-                painter = painterResource(id = R.drawable.ic_instagram),
-                contentDescription = "",
+            .padding(8.dp)
+        ) {
+            Row(modifier = Modifier
+                .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically ){
+                Image(modifier = Modifier
+                    .clip(shape = CircleShape)
+                    .background(color = Color.White)
+                    .padding(8.dp)
+                    .size(50.dp),
+                    painter = painterResource(id = R.drawable.ic_instagram),
+                    contentDescription = "",
 
+                    )
+                UserStatistic(title = "Posts", value = "9849")
+                UserStatistic(title = "Followers", value = "576")
+                UserStatistic(title = "Following", value = "900")
+
+            }
+            Text(text = "Instagram",
+                fontSize = 24.sp,
+                fontStyle = FontStyle.Italic,
+                fontFamily = FontFamily.Cursive
             )
-            UserStatistic(title = "Posts", value = "9849")
-            UserStatistic(title = "Followers", value = "576")
-            UserStatistic(title = "Following", value = "900")
+            Text(text = "#YoursToMake",
+                fontSize = 16.sp)
+            Text(text = "www.facebook.com//",
+                fontSize = 16.sp)
 
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = { }) {
+                Text(text = "Follow")
+            }
         }
+
     }
 
 }

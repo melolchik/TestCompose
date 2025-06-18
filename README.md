@@ -723,3 +723,59 @@ fun InstagramProfileCard(){
     }
 
 }
+
+#2.10 Завершение работы над InstagramProfileCard
+
+
+@Composable
+fun InstagramProfileCard(){
+
+    Card (modifier = Modifier.padding(8.dp),
+        shape = RoundedCornerShape(topStart =8.dp, topEnd = 8.dp),
+        border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.onBackground),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)
+    )
+    {
+        Column (modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+        ) {
+            Row(modifier = Modifier
+                .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically ){
+                Image(modifier = Modifier
+                    .clip(shape = CircleShape)
+                    .background(color = Color.White)
+                    .padding(8.dp)
+                    .size(50.dp),
+                    painter = painterResource(id = R.drawable.ic_instagram),
+                    contentDescription = "",
+
+                    )
+                UserStatistic(title = "Posts", value = "9849")
+                UserStatistic(title = "Followers", value = "576")
+                UserStatistic(title = "Following", value = "900")
+
+            }
+			<----- Добавили 3 текста
+            Text(text = "Instagram",
+                fontSize = 24.sp,
+                fontStyle = FontStyle.Italic,
+                fontFamily = FontFamily.Cursive
+            )
+            Text(text = "#YoursToMake",
+                fontSize = 16.sp)
+            Text(text = "www.facebook.com//",
+                fontSize = 16.sp)
+
+            Spacer(modifier = Modifier.height(16.dp))
+			<-------- Добавили кнопку с текстом
+            Button(onClick = { }) {
+                Text(text = "Follow")
+            }
+        }
+
+    }
+
+}
