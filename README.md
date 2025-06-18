@@ -385,3 +385,104 @@ fun InstagramProfileCard(){
     }
 
 }
+
+#2.6 Dark-Light Themes
+В файле Theme.kt есть функция TestComposeTheme, которая определяет Dark или Light тему в зависимости от системных настроек. А цвета в темах можно настроить
+Это Composable-функция. Поэтому мы её добавляем в активити
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        //enableEdgeToEdge()
+        setContent {
+            TestComposeTheme {
+                InstagramProfileCard()
+            }
+
+       }
+    }
+}
+
+Зададим цвета для тем
+
+private val DarkColorScheme = darkColorScheme(
+    primary = Purple80,
+    secondary = PurpleGrey80,
+    tertiary = Pink80,
+
+    background = Color.Black,
+    surface = Color.Black,
+    onPrimary = Color.Black,
+    onSecondary = Color.White,
+    onTertiary = Color.White,
+    onBackground = Color.White,
+    onSurface = Color.White,
+)
+
+private val LightColorScheme = lightColorScheme(
+    primary = Purple40,
+    secondary = PurpleGrey40,
+    tertiary = Pink40,
+
+    
+    background = Color.White,
+    surface = Color.White,
+    onPrimary = Color.White,
+    onSecondary = Color.Black,
+    onTertiary = Color.Black,
+    onBackground = Color.Black,
+    onSurface = Color.Black,
+    
+)
+
+Поменяем цвета в карточке
+
+fun InstagramProfileCard(){
+
+    Card (shape = RoundedCornerShape(topStart =8.dp, topEnd = 8.dp),
+        border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.onBackground),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)
+    )
+	....
+	
+И сделаем два превью для разных схем
+
+@Preview
+@Composable
+fun InstagramProfileCardLight(){
+    TestComposeTheme(darkTheme = false){
+        InstagramProfileCard()
+    }
+}
+
+@Preview
+@Composable
+fun InstagramProfileCardDark(){
+    TestComposeTheme(darkTheme = true){
+        InstagramProfileCard()
+    }
+}
+
+Поменяем также цвет за пределами карточки
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        //enableEdgeToEdge()
+        setContent {
+            TestComposeTheme {
+                Column (modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = MaterialTheme.colorScheme.background)
+                ){
+                    InstagramProfileCard()
+                }
+
+            }
+
+       }
+    }
+}
+Но в таких случаях использование Column излишне, лучше использовать Box

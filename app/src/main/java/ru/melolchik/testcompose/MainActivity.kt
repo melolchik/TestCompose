@@ -37,20 +37,16 @@ class MainActivity : ComponentActivity() {
 
         //enableEdgeToEdge()
         setContent {
-            InstagramProfileCard()
+            TestComposeTheme {
+                Box (modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = MaterialTheme.colorScheme.background)
+                ){
+                    InstagramProfileCard()
+                }
+
+            }
+
        }
-    }
-}
-
-
-@Preview
-@Composable
-fun CardTest(){
-    Card(modifier = Modifier.padding(16.dp),
-        shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Green, contentColor = Color.Red),
-        border = BorderStroke(width = 1.dp,color = Color.Black)
-    ){
-        Text("Hello World" , modifier = Modifier.padding(16.dp))
     }
 }
