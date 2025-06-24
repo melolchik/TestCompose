@@ -1,5 +1,6 @@
 package ru.melolchik.testcompose.ui.theme
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -15,11 +16,21 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,7 +46,9 @@ import ru.melolchik.testcompose.R
 
 
 @Composable
-fun InstagramProfileCard(){
+fun InstagramProfileCard(mainViewModel: MainViewModel){
+    Log.d("RECOMPOSITION", "InstagramProfileCard")
+    val isFollowed =  mainViewModel.isFollowing.observeAsState(initial = false)
 
     Card (modifier = Modifier.padding(8.dp),
         shape = RoundedCornerShape(topStart =8.dp, topEnd = 8.dp),
@@ -43,6 +56,7 @@ fun InstagramProfileCard(){
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)
     )
     {
+        Log.d("RECOMPOSITION", "Card")
         Column (modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
@@ -76,15 +90,31 @@ fun InstagramProfileCard(){
                 fontSize = 16.sp)
 
             Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = { }) {
-                Text(text = "Follow")
+            FollowButton(isFollowed = isFollowed){
+                mainViewModel.changeFollowingStatus()
             }
         }
 
     }
 
 }
+@Composable
+private fun FollowButton(isFollowed  : State<Boolean>, clickListener: () -> Unit){
 
+    Log.d("RECOMPOSITION", "FollowButton")
+    Button(onClick = {
+                        clickListener()
+                     },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if(isFollowed.value) {
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+            } else{
+                MaterialTheme.colorScheme.primary
+            }
+        )) {
+        Text(text = if(isFollowed.value) "Unfollow" else "Follow")
+    }
+}
 @Composable
 private  fun UserStatistic(title : String, value : String){
     Column(modifier = Modifier
@@ -102,18 +132,3 @@ private  fun UserStatistic(title : String, value : String){
     }
 }
 
-@Preview
-@Composable
-fun InstagramProfileCardLight(){
-    TestComposeTheme(darkTheme = false){
-        InstagramProfileCard()
-    }
-}
-
-@Preview
-@Composable
-fun InstagramProfileCardDark(){
-    TestComposeTheme(darkTheme = true){
-        InstagramProfileCard()
-    }
-}

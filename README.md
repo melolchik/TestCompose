@@ -779,3 +779,293 @@ fun InstagramProfileCard(){
     }
 
 }
+
+#4.2 Добавление VIewModel в InstagramProfileCard
+
+Добавим стейт для кнопки и будем по нему менять текст кнопки
+
+fun InstagramProfileCard(){
+    val isFollowed = remember {
+        mutableStateOf(false)
+    }
+	.....
+
+  Button(onClick = { isFollowed.value = !isFollowed.value }) {
+                Text(text = if(isFollowed.value) "Unfollow" else "Follow")
+            }
+При повороте состояние не сохраняется
+
+remember - умеет переживать рекомпозицию, но не умеет переживать поворот экрана. Чтобы это исправить нужно использовать rememberSaveable
+
+ val isFollowed = rememberSaveable {
+        mutableStateOf(false)
+    }
+	
+Поменяем также цвет кнопки
+Button(onClick = { isFollowed.value = !isFollowed.value },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if(isFollowed.value) {
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                    } else{
+                        MaterialTheme.colorScheme.primary
+                    }
+                )) {
+                Text(text = if(isFollowed.value) "Unfollow" else "Follow")
+            }
+Сейчас всё хорошо и всё работает. НО КНОПКА САМА УПРАВЛЯЕТ своим состоянием. Это не очень хорошее поведение. Это STATEFULL Composable-функция
+
+Сделаем некоторые изменения. Во первых вынесем кнопку в отдельную функцию
+
+
+@Composable
+private fun FollowButton(isFollowed  : Boolean, clickListener: () -> Unit){ <--- передаём значение Boolean и функцию, которая не принимает никаких значений и ничего не возвращает
+    Button(onClick = {
+                        clickListener() <---- просто вызов функции
+                     },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if(isFollowed) {
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+            } else{
+                MaterialTheme.colorScheme.primary
+            }
+        )) {
+        Text(text = if(isFollowed) "Unfollow" else "Follow")
+    }
+}
+
+МЫ ПОЛУЧИЛИ кнопку, которая внутри себя не хранит никакой стейт и также его не изменяет. Это называется STATELESS Composable-функция
+
+Вызываем так
+
+ FollowButton(isFollowed = isFollowed.value){
+                isFollowed.value = !isFollowed.value
+            }
+			
+Сейчас мы ещё улучшили приложение, но этого также не достаточно!
+Сейчас мы прямо здесь опеределяем пользователь подписан или нет. Но это не логика View-слоя
+Вынесем её в ViewModel
+
+
+class MainViewModel : ViewModel() {
+    
+    private val _isFollowing = MutableLiveData<Boolean>(false)
+    val isFollowing : LiveData<Boolean> = _isFollowing
+    
+    fun changeFollowingStatus(){
+        val value = _isFollowing.value ?: false
+        _isFollowing.value = !value
+    }
+}
+
+Добавляем в активити и передаём в InstagramProfileCard
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val viewModel = ViewModelProvider(this)[MainViewModel::class.java]
+        //enableEdgeToEdge()
+        setContent {
+            TestComposeTheme {
+                Box (modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = MaterialTheme.colorScheme.background)
+                ){
+                    InstagramProfileCard(viewModel)
+                }
+
+            }
+
+       }
+    }
+}
+
+Но Compose не умеет работаь с LiveData. Нужно добавлять доп.библиотеку
+
+implementation("androidx.compose.runtime:runtime-livedata:1.2.1")
+
+И далее 
+
+@Composable
+fun InstagramProfileCard(mainViewModel: MainViewModel){
+    val isFollowed=  mainViewModel.isFollowing.observeAsState(initial = false)
+	............
+	и по клику вызываем функцию из VIewModel
+	
+         FollowButton(isFollowed = isFollowed.value){
+                mainViewModel.changeFollowingStatus()
+            }
+	.........
+	
+#4.3 Делегаты
+
+Предположим есть состояние в Composable
+
+  var a : MutableState<Int> = remember {
+        mutableStateOf(5)
+    }
+    
+    val b : Int = a.value <--- Это получение значения
+    a.value = 10 <----- Это запись значения
+	
+	Теперь сделаем небольшое изменение вместо = сделаем by <---- Делегирование
+	
+	 var a : MutableState<Int> by remember {
+        mutableStateOf(5)
+    }
+	
+	При этом импортируются 
+	
+	
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+
+А переменная a уже будет типа Int
+
+ var a : Int by remember {
+        mutableStateOf(5)
+    }
+И вытаскивать/менять значения уже можно без value, при этом вызываются делегаты getValue/setValue , которые требовалось импортировать выше!
+    val b = a
+    a = 10
+	
+Таким образом можно изменить и STATE
+
+    val isFollowed =  mainViewModel.isFollowing.observeAsState(initial = false)
+			на
+	val isFollowed by  mainViewModel.isFollowing.observeAsState(initial = false) <---- Тип уже Boolean
+	
+	
+Добавим логи
+
+@Composable
+fun InstagramProfileCard(mainViewModel: MainViewModel){
+    Log.d("RECOMPOSITION", "InstagramProfileCard") <------------------------------
+    val isFollowed by  mainViewModel.isFollowing.observeAsState(initial = false)
+
+    Card (modifier = Modifier.padding(8.dp),
+        shape = RoundedCornerShape(topStart =8.dp, topEnd = 8.dp),
+        border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.onBackground),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)
+    )
+    {
+        Log.d("RECOMPOSITION", "Card") <------------------------------
+        Column (modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+        ) {
+            Row(modifier = Modifier
+                .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically ){
+                Image(modifier = Modifier
+                    .clip(shape = CircleShape)
+                    .background(color = Color.White)
+                    .padding(8.dp)
+                    .size(50.dp),
+                    painter = painterResource(id = R.drawable.ic_instagram),
+                    contentDescription = "",
+
+                    )
+                UserStatistic(title = "Posts", value = "9849")
+                UserStatistic(title = "Followers", value = "576")
+                UserStatistic(title = "Following", value = "900")
+
+            }
+            Text(text = "Instagram",
+                fontSize = 24.sp,
+                fontStyle = FontStyle.Italic,
+                fontFamily = FontFamily.Cursive
+            )
+            Text(text = "#YoursToMake",
+                fontSize = 16.sp)
+            Text(text = "www.facebook.com//",
+                fontSize = 16.sp)
+
+            Spacer(modifier = Modifier.height(16.dp))
+            FollowButton(isFollowed = isFollowed){ <-------------- Стейт получаем ещё в функции Card
+                mainViewModel.changeFollowingStatus()
+            }
+        }
+
+    }
+
+}
+@Composable
+private fun FollowButton(isFollowed  : Boolean, clickListener: () -> Unit){
+
+    Log.d("RECOMPOSITION", "FollowButton") <------------------------------
+    Button(onClick = {
+                        clickListener()
+                     },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if(isFollowed) {
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+            } else{
+                MaterialTheme.colorScheme.primary
+            }
+        )) {
+        Text(text = if(isFollowed) "Unfollow" else "Follow")
+    }
+}
+
+При вызове и нажатии на кнопку результат следующий
+
+2025-06-20 12:45:37.641 29906-29906 RECOMPOSITION           ru.melolchik.testcompose             D  InstagramProfileCard
+2025-06-20 12:45:37.663 29906-29906 RECOMPOSITION           ru.melolchik.testcompose             D  Card
+2025-06-20 12:45:37.728 29906-29906 RECOMPOSITION           ru.melolchik.testcompose             D  FollowButton
+2025-06-20 12:45:44.966 29906-29906 RECOMPOSITION           ru.melolchik.testcompose             D  Card
+2025-06-20 12:45:44.971 29906-29906 RECOMPOSITION           ru.melolchik.testcompose             D  FollowButton
+2025-06-20 12:45:51.015 29906-29906 RECOMPOSITION           ru.melolchik.testcompose             D  Card
+2025-06-20 12:45:51.044 29906-29906 RECOMPOSITION           ru.melolchik.testcompose             D  FollowButton
+2025-06-20 12:45:52.532 29906-29906 RECOMPOSITION           ru.melolchik.testcompose             D  Card
+2025-06-20 12:45:52.542 29906-29906 RECOMPOSITION           ru.melolchik.testcompose             D  FollowButton
+2025-06-20 12:45:54.338 29906-29906 RECOMPOSITION           ru.melolchik.testcompose             D  Card
+2025-06-20 12:45:54.346 29906-29906 RECOMPOSITION           ru.melolchik.testcompose             D  FollowButton
+2025-06-20 12:45:55.714 29906-29906 RECOMPOSITION           ru.melolchik.testcompose             D  Card
+2025-06-20 12:45:55.721 29906-29906 RECOMPOSITION           ru.melolchik.testcompose             D  FollowButton
+
+Т.е. вызывается рекомпозиция не только кнопки, но и все карточки. Почему - потому-что стейт для кнопки получаем ещё в функции Card!
+
+Как же сделать так,чтобы при изменении кнопки перерисовывалась только кнопка!
+
+Нужно передать в кнопку не Boolean а State<Boolean>
+
+Возвращаем isFollowed в STATE
+
+val isFollowed =  mainViewModel.isFollowing.observeAsState(initial = false) !!! РАВНО
+ FollowButton(isFollowed = isFollowed){
+                mainViewModel.changeFollowingStatus()
+            }
+			
+@Composable
+private fun FollowButton(isFollowed  : State<Boolean>, clickListener: () -> Unit){ <---- isFollowed  : State<Boolean>
+
+    Log.d("RECOMPOSITION", "FollowButton")
+    Button(onClick = {
+                        clickListener()
+                     },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if(isFollowed.value) { <----- через value
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+            } else{
+                MaterialTheme.colorScheme.primary
+            }
+        )) {
+        Text(text = if(isFollowed.value) "Unfollow" else "Follow") <----- через value
+    }
+}
+
+Проверяем логи по рекомпозиции
+
+2025-06-20 12:55:20.603  1835-1835  RECOMPOSITION           ru.melolchik.testcompose             D  InstagramProfileCard
+2025-06-20 12:55:20.624  1835-1835  RECOMPOSITION           ru.melolchik.testcompose             D  Card
+2025-06-20 12:55:20.686  1835-1835  RECOMPOSITION           ru.melolchik.testcompose             D  FollowButton
+2025-06-20 12:55:40.932  1835-1835  RECOMPOSITION           ru.melolchik.testcompose             D  FollowButton
+2025-06-20 12:55:41.609  1835-1835  RECOMPOSITION           ru.melolchik.testcompose             D  FollowButton
+2025-06-20 12:55:42.065  1835-1835  RECOMPOSITION           ru.melolchik.testcompose             D  FollowButton
+2025-06-20 12:55:42.263  1835-1835  RECOMPOSITION           ru.melolchik.testcompose             D  FollowButton
+2025-06-20 12:55:42.417  1835-1835  RECOMPOSITION           ru.melolchik.testcompose             D  FollowButton
+
+Лишней перерисовки не происходит, по этой причине использование делегатов не всегда удобно
+Мы не зависм от стейта, пока не вызываем .value

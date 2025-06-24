@@ -44,13 +44,16 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModelProvider
 import ru.melolchik.testcompose.ui.theme.InstagramProfileCard
+import ru.melolchik.testcompose.ui.theme.MainViewModel
 import ru.melolchik.testcompose.ui.theme.TestComposeTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         //enableEdgeToEdge()
         setContent {
             TestComposeTheme {
@@ -58,7 +61,7 @@ class MainActivity : ComponentActivity() {
                     .fillMaxSize()
                     .background(color = MaterialTheme.colorScheme.background)
                 ){
-                    InstagramProfileCard()
+                    InstagramProfileCard(viewModel)
                 }
 
             }
@@ -68,21 +71,4 @@ class MainActivity : ComponentActivity() {
 }
 
 
-@Preview
-@Composable
-fun TestImage(){
 
-    Box(modifier = Modifier.size(200.dp)
-        .background(Color.Cyan)){
-
-        Image(modifier = Modifier
-            .background(Color.Green)
-            .padding(25.dp)
-            .size(100.dp)
-            .background(Color.Red).padding(25.dp),
-            painter = ColorPainter(Color.Yellow),
-            contentDescription = "",
-            contentScale = ContentScale.FillBounds)
-    }
-
-}
