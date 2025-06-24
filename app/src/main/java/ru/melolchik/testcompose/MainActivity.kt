@@ -1,6 +1,7 @@
 package ru.melolchik.testcompose
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -16,9 +17,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
@@ -56,19 +60,35 @@ class MainActivity : ComponentActivity() {
         val viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         //enableEdgeToEdge()
         setContent {
-            TestComposeTheme {
-                Box (modifier = Modifier
-                    .fillMaxSize()
-                    .background(color = MaterialTheme.colorScheme.background)
-                ){
-                    InstagramProfileCard(viewModel)
-                }
+            Test(viewModel = viewModel)
 
-            }
-
-       }
+        }
     }
 }
 
+
+@Composable
+fun Test(viewModel: MainViewModel) {
+    TestComposeTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.background)
+        ) {
+            val scrollState = rememberScrollState()
+            LazyColumn() {
+
+                items(100) {
+                    Log.d("Test", "Item index = $it")
+                    InstagramProfileCard(viewModel)
+                }
+
+
+            }
+
+        }
+
+    }
+}
 
 

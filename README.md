@@ -1069,3 +1069,98 @@ private fun FollowButton(isFollowed  : State<Boolean>, clickListener: () -> Unit
 
 Лишней перерисовки не происходит, по этой причине использование делегатов не всегда удобно
 Мы не зависм от стейта, пока не вызываем .value
+
+
+#4.6 LazyColumn
+
+Выведем несколько элементов InstagramProfileCard - список
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val viewModel = ViewModelProvider(this)[MainViewModel::class.java]
+        //enableEdgeToEdge()
+        setContent {
+            Test(viewModel = viewModel)
+
+       }
+    }
+}
+
+
+@Composable
+fun Test(viewModel: MainViewModel){
+    TestComposeTheme {
+        Box (modifier = Modifier
+            .fillMaxSize()
+            .background(color = MaterialTheme.colorScheme.background)
+        ){
+            Column { <------------ Column не скролится, это нужно добавить!
+                repeat(100) {
+                    InstagramProfileCard(viewModel)
+                }
+            }
+            
+        }
+
+    }
+}
+
+
+@Composable
+fun Test(viewModel: MainViewModel){
+    TestComposeTheme {
+        Box (modifier = Modifier
+            .fillMaxSize()
+            .background(color = MaterialTheme.colorScheme.background)
+        ){
+            val scrollState = rememberScrollState() <--- запоминаем и передаём state скрола
+            Column(modifier = Modifier.verticalScroll(scrollState)) {
+                repeat(100) {
+                    InstagramProfileCard(viewModel)
+                }
+            }
+
+        }
+
+    }
+}
+
+Всё работает и скролится, но если добавить 500 элементов - всё будет тормозить - работает как ListView
+Для этого был создан RecyclerView. Здесь аналог - LazyColumn
+
+Но 
+
+LazyColumn() { //content: LazyListScope.() -> Unit
+                item { <---- используется для добавления любого элемента в список как контейнер
+                    Text(text = "Text1")
+                }
+//                repeat(100) {
+//                    InstagramProfileCard(viewModel)
+//                }
+            }
+
+-----------------
+ LazyColumn() {
+
+                repeat(100) {
+
+                    item {
+                        Log.d("Test", "Item index = $it")
+                        InstagramProfileCard(viewModel)
+                    }
+
+                }
+            }
+----- либо тоже самое так
+
+ LazyColumn() {
+
+                items(100) { <-----------------------
+                    Log.d("Test", "Item index = $it")
+                    InstagramProfileCard(viewModel)
+                }
+            }
+			
+При скроле список может подтормаживать - обычно это только на дебажный сборках!!
