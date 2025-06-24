@@ -1164,3 +1164,138 @@ LazyColumn() { //content: LazyListScope.() -> Unit
             }
 			
 При скроле список может подтормаживать - обычно это только на дебажный сборках!!
+
+#4.7 LazyRow, LazyVerticalGrid
+
+Добавим класс данных для InstagramProfileCard
+
+data class InstagramModel(
+    val id : Int,
+    val title : String,
+    val isFollowed : Boolean)
+	
+	
+class MainViewModel : ViewModel() {
+    
+    private val initList = mutableListOf<InstagramModel>().apply { 
+        repeat(500){
+            add( InstagramModel(it, "Title : $it", isFollowed = Random.nextBoolean()))
+        }
+    }
+
+    private val _models = MutableLiveData<List<InstagramModel>>(initList)
+    val models : LiveData<List<InstagramModel>> = _models
+
+    fun changeFollowingStatus(model: InstagramModel){
+	//менять коллекцию из LiveData не стоит, лучше работать с её копией
+	
+	fun changeFollowingStatus(model: InstagramModel){
+        val modifiedList = _models.value.toMutableList() ?: mutableListOf()
+        
+        modifiedList.replaceAll{
+            if(it == model){
+                it.copy(isFollowed = !it.isFollowed)
+            }else{
+                it
+            }
+        }
+    }
+	
+	....
+В InstagramProfileCard тепепрь передаём InstagramModel и выносим клик по кнопке наверх, т.к. VIewModel тепепрь не передаём сюда
+
+@Composable
+fun InstagramProfileCard(instagramModel: InstagramModel, <-------------------------
+                         onFollowedButtonClickListener : (InstagramModel)-> Unit){ <---------------------
+    
+
+    Card (modifier = Modifier.padding(8.dp),
+        shape = RoundedCornerShape(topStart =8.dp, topEnd = 8.dp),
+        border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.onBackground),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)
+    )
+    {
+        Log.d("RECOMPOSITION", "Card")
+        Column (modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+        ) {
+            Row(modifier = Modifier
+                .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically ){
+                Image(modifier = Modifier
+                    .clip(shape = CircleShape)
+                    .background(color = Color.White)
+                    .padding(8.dp)
+                    .size(50.dp),
+                    painter = painterResource(id = R.drawable.ic_instagram),
+                    contentDescription = "",
+
+                    )
+                UserStatistic(title = "Posts", value = "9849")
+                UserStatistic(title = "Followers", value = "576")
+                UserStatistic(title = "Following", value = "900")
+
+            }
+            Text(text = "Instagram",
+                fontSize = 24.sp,
+                fontStyle = FontStyle.Italic,
+                fontFamily = FontFamily.Cursive
+            )
+            Text(text = "#YoursToMake",
+                fontSize = 16.sp)
+            Text(text = "www.facebook.com//",
+                fontSize = 16.sp)
+
+            Spacer(modifier = Modifier.height(16.dp))
+            FollowButton(isFollowed = instagramModel.isFollowed){ <---------------
+                onFollowedButtonClickListener(instagramModel) <------------------
+            }
+        }
+
+    }
+
+}
+@Composable
+private fun FollowButton(isFollowed  : Boolean, clickListener: () -> Unit){ <------------ Ьеняем State<Boolean> на Boolean
+
+    Log.d("RECOMPOSITION", "FollowButton")
+    Button(onClick = {
+                        clickListener()
+                     },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if(isFollowed) {
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+            } else{
+                MaterialTheme.colorScheme.primary
+            }
+        )) {
+        Text(text = if(isFollowed) "Unfollow" else "Follow")
+    }
+}
+
+В MainActivity
+
+val models = viewModel.models.observeAsState(listOf()) <--- стейт модели
+            
+			LazyColumn() {
+                items(models.value){ model ->				<-- перегруженная функция items, которая принимает список объектов
+                    InstagramProfileCard(model){
+                        viewModel.changeFollowingStatus(model)
+                    }
+                }
+				
+Если хотим использовать строчку то можно использовать LazyRow - можно просто поменять
+
+А также в виде таблицы
+
+ LazyVerticalGrid(columns = GridCells.Fixed(2)) { <-- 2- кол-во элементов в строке, т.е. 2 колонки
+               // items(items = )
+                items(models.value){ model ->
+                    InstagramProfileCard(model){
+                        viewModel.changeFollowingStatus(model)
+                    }
+                }
+            }
+				
