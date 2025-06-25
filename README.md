@@ -1298,4 +1298,175 @@ val models = viewModel.models.observeAsState(listOf()) <--- стейт моде�
                     }
                 }
             }
+			
+#4.8 Swipe to dismiss
+
+Вернём отображение к LazyColumn поработаем с состоянием скрола
+
+@Composable
+fun Test(viewModel: MainViewModel) {
+    TestComposeTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.background)
+        ) {
+            val models = viewModel.models.observeAsState(listOf())
+            val lazyListState = rememberLazyListState() <---- стейт скрола в LazyColumn
+            val scope = rememberCoroutineScope()		<----- скоуп для Composable
+            LazyColumn(state = lazyListState) {
+                // items(items = )
+                items(models.value) { model ->
+                    InstagramProfileCard(model) {
+                        viewModel.changeFollowingStatus(model)
+                    }
+                }
+            }
+            FloatingActionButton( <---- добавим кнопку для работы с стетом скрола в списке
+                onClick = {
+                    scope.launch {
+                        lazyListState.scrollToItem(0) <---- suspend
+                    }
+                }) {
+
+            }
+
+        }
+    }
+}
+
+Через lazyListState можно скролить, а можно получать информацию о позициях ...
+
+Удаляем работу со стейтом и двигаемся дальше
+
+
+fun SwipeToDismiss(
+    state: DismissState, //состояние
+    background: @Composable RowScope.() -> Unit,//фон
+    dismissContent: @Composable RowScope.() -> Unit, //контент
+    modifier: Modifier = Modifier,
+    directions: Set<DismissDirection> = setOf(EndToStart, StartToEnd),//направление по умолчанию справа-налево и слева-направо
+) 
 				
+class DismissState(
+    initialValue: DismissValue, // изначальное состояние
+    confirmValueChange: (DismissValue) -> Boolean = { true },
+    positionalThreshold: Density.(totalDistance: Float) -> Float = // какой процент экрана нужно пройти,чтобы элемент исчез
+        SwipeToDismissDefaults.FixedPositionalThreshold,
+)
+
+fun Test(viewModel: MainViewModel) {
+    TestComposeTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.background)
+        ) {
+            val models = viewModel.models.observeAsState(listOf())           
+            LazyColumn {
+                // items(items = )
+               
+                items(models.value) { model ->
+                    val dismissState = rememberDismissState() <--- стейт свайпа
+                    SwipeToDismiss(state = dismissState,  <---- свайп
+                        background = {						<-- бэкграунд - красный прямоугольник с текстом
+                                     Box(modifier = Modifier.padding(16.dp)
+                                                            .background(color = Color.Red.copy(alpha = 0.5f))
+                                                            .fillMaxSize()
+                                                            ,
+                                         contentAlignment = Alignment.CenterEnd
+                                         ){
+                                         Text(text = "Delete Item",
+                                             modifier = Modifier.padding(16.dp),
+                                             color = Color.White)
+                                     }
+                        }
+                        ,dismissContent = {
+                            InstagramProfileCard(model) {
+                                viewModel.changeFollowingStatus(model)
+                            }
+                        },
+                        directions = setOf(DismissDirection.EndToStart) <-- направление только справа-налево
+                    )
+
+                }
+            }
+           
+
+        }
+
+
+    }
+}
+
+Теперь элемент свайпится но не удаляется из списка
+
+Добавим удаление элемента во VIewModel
+
+class MainViewModel : ViewModel() {
+
+    .......
+
+    fun delete( model : InstagramModel){
+        val modifiedList = _models.value.toMutableList() ?: mutableListOf()
+        modifiedList.remove(model)
+        _models.value = modifiedList
+    }
+}
+
+Добавляем удаление
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun Test(viewModel: MainViewModel) {
+    TestComposeTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.background)
+        ) {
+            val models = viewModel.models.observeAsState(listOf())           
+            LazyColumn {
+                // items(items = )
+               
+                items(models.value) { model ->
+                    val dismissState = rememberDismissState()
+
+                    if(dismissState.isDismissed(DismissDirection.EndToStart)){ <-----------  При этом происходит что-то странное, все элементы удаляются по одному. 
+                        viewModel.delete(model)									<----------	 Разбираемся дальше
+                    }															<----------
+                    SwipeToDismiss(state = dismissState, 
+                        background = {
+                                     Box(modifier = Modifier.padding(16.dp)
+                                                            .background(color = Color.Red.copy(alpha = 0.5f))
+                                                            .fillMaxSize()
+                                                            ,
+                                         contentAlignment = Alignment.CenterEnd
+                                         ){
+                                         Text(text = "Delete Item",
+                                             modifier = Modifier.padding(16.dp),
+                                             color = Color.White)
+                                     }
+                        }
+                        ,dismissContent = {
+                            InstagramProfileCard(model) {
+                                viewModel.changeFollowingStatus(model)
+                            }
+                        },
+                        directions = setOf(DismissDirection.EndToStart)
+                    )
+
+                }
+            }
+           
+
+        }
+
+
+    }
+}
+
+
+items(models.value, key = {it.id}) { model -> <---- создаём для Composable-функции id или ключ!!
+Если работаем со списками, то обязательно нужно указывать ключ, который зависит от объекта, который хотим отобразить, обычно это id элемента
+Это относится и к функции item!
